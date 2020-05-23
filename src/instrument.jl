@@ -21,7 +21,7 @@ function disconnect!(instr::Instrument)
 	end
 end
 
-#String reads and writes
+# String reads and writes
 check_connected(instr::Instrument) = @assert instr.connected "Instrument is not connected!"
 
 macro check_connected(ex)
@@ -37,12 +37,20 @@ end
 
 @check_connected write(instr::Instrument, msg::AbstractString) = viWrite(instr.handle, msg)
 
-@check_connected read(instr::Instrument) = rstrip(viRead(instr.handle; bufSize=instr.bufSize), ['\r', '\n'])
+@check_connected read(instr::Instrument) = rstrip(viRead(instr.handle; bufSize = instr.bufSize), ['\r', '\n'])
 
 @check_connected readavailable(instr::Instrument) = readavailable(instr.handle)
 
-function query(instr::Instrument, msg::AbstractString; delay::Real=0)
+@check_connected readavailable!(instr::Instrument, ret::IOBuffer) = readavailable!(instr.handle, ret)
+
+function query(instr::Instrument, msg::AbstractString; delay::Real = 0)
 	write(instr, msg)
 	sleep(delay)
 	read(instr)
+end
+
+function query(instr::Instrument, msg::AbstractString, ret::IOBuffer; delay::Real = 0)
+	write(instr, msg)
+	sleep(delay)
+	readavailable!(instr, ret)
 end
