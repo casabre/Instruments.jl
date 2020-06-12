@@ -39,9 +39,11 @@ end
 
 @check_connected read(instr::Instrument) = rstrip(viRead(instr.handle; bufSize = instr.bufSize), ['\r', '\n'])
 
+@check_connected read!(instr::Instrument, buffer::Array{UInt8}) = viRead!(instr.handle, buffer)
+
 @check_connected readavailable(instr::Instrument) = readavailable(instr.handle)
 
-@check_connected readavailable!(instr::Instrument, ret::IOBuffer) = readavailable!(instr.handle, ret)
+@check_connected readavailable!(instr::Instrument, buffer::IOBuffer) = readavailable!(instr.handle, buffer)
 
 function query(instr::Instrument, msg::AbstractString; delay::Real = 0)
 	write(instr, msg)
@@ -49,8 +51,14 @@ function query(instr::Instrument, msg::AbstractString; delay::Real = 0)
 	read(instr)
 end
 
-function query(instr::Instrument, msg::AbstractString, ret::IOBuffer; delay::Real = 0)
+function query!(instr::Instrument, msg::AbstractString, buffer::Array{UInt8}; delay::Real = 0)
 	write(instr, msg)
 	sleep(delay)
-	readavailable!(instr, ret)
+	read!(instr, buffer)
+end
+
+function query!(instr::Instrument, msg::AbstractString, buffer::IOBuffer; delay::Real = 0)
+	write(instr, msg)
+	sleep(delay)
+	readavailable!(instr, buffer)
 end
