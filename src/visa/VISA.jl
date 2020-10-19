@@ -265,7 +265,8 @@ end
 
 function readavailable(instrHandle::ViSession, func::Function)::Nothing
 	ret = IOBuffer()
-	buf = zeros(UInt8, 0x400)
+	rd_buf_size = viGetAttribute(instrHandle, VI_ATTR_RD_BUF_SIZE)
+	buf = zeros(UInt8, rd_buf_size)
 	while true
 		(done, bytesRead) = viRead!(instrHandle, buf)
 		func(buf[1:bytesRead])
