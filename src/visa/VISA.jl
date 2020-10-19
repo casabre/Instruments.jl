@@ -259,15 +259,21 @@ end
 
 function readavailable(instrHandle::ViSession)
 	ret = IOBuffer()
-	buf = Array(UInt8, 0x400)
+	readavailable(instrHandle, x::Vector{UInt8} -> write(ret, x))
+	take!(ret)
+end
+
+function readavailable(instrHandle::ViSession, func::Function)::Nothing
+	ret = IOBuffer()
+	buf = zeros(UInt8, 0x400)
 	while true
 		(done, bytesRead) = viRead!(instrHandle, buf)
-		write(ret,buf[1:bytesRead])
+		func(buf[1:bytesRead])
 		if done
 			break
 		end
 	end
-	take!(ret)
+	nothing
 end
 
 
